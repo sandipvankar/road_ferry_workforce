@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 
 class CustomButton extends StatelessWidget {
   final String title;
@@ -24,10 +25,10 @@ class CustomButton extends StatelessWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: isOutlined
-              ? Colors.white
-              : (backgroundColor ?? Colors.deepOrange),
+              ? AppColors.white
+              : (backgroundColor ?? AppColors.deepOrange),
           side: isOutlined
-              ? BorderSide(color: backgroundColor ?? Colors.deepOrange)
+              ? BorderSide(color: backgroundColor ?? AppColors.deepOrange)
               : null,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -38,8 +39,8 @@ class CustomButton extends StatelessWidget {
           title,
           style: TextStyle(
             color: isOutlined
-                ? (backgroundColor ?? Colors.deepOrange)
-                : (textColor ?? Colors.white),
+                ? (backgroundColor ?? AppColors.deepOrange)
+                : (textColor ?? AppColors.white),
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

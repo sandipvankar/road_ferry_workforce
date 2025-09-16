@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/app_colors.dart';
 import '../../models/order.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../widgets/order_card.dart';
@@ -7,6 +8,7 @@ import '../auth/login_screen.dart';
 import '../profile/faq_screen.dart';
 import '../profile/profile_screen.dart';
 import '../profile/terms_screen.dart';
+import '../notification/notification_screen.dart';
 import 'add_labour_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,31 +18,67 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _DashboardScreenState extends State<DashboardScreen> {
+  late DashboardViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    _viewModel = DashboardViewModel();
+    _viewModel.fetchOrders();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DashboardViewModel()..fetchOrders(),
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.mainBackgroundColor,
         appBar: AppBar(
-          title: const Text('Dashboard'),
-          backgroundColor: Colors.deepOrange,
+          title: Row(
+            children: [
+              Image.asset('lib/assets/logo.png', height: 40),
+              const SizedBox(width: 8),
+              const Text('Dashboard'),
+            ],
+          ),
+          backgroundColor: AppColors.white,
+          foregroundColor: AppColors.titleTextColor,
+          elevation: 0,
           actions: [
+            Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: const Text(
+                      '19',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             PopupMenuButton<String>(
               onSelected: (value) {
                 switch (value) {
@@ -122,110 +160,185 @@ class _DashboardScreenState extends State<DashboardScreen>
               ],
             ),
           ],
-          bottom: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: const [
-              Tab(text: 'Active Orders'),
-              Tab(text: 'Pending Orders'),
-              Tab(text: 'Rejected Orders'),
-              Tab(text: 'Completed Orders'),
-            ],
-          ),
-        ),
-        body: Consumer<DashboardViewModel>(
-          builder: (context, viewModel, _) {
-            if (viewModel.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
 
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOrderList(viewModel.activeOrders, true),
-                _buildOrderList(viewModel.pendingOrders, true),
-                _buildOrderList(viewModel.rejectedOrders, true),
-                _buildOrderList(viewModel.completedOrders, false),
-              ],
-            );
-          },
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AddLabourScreen()),
-            );
-          },
-          backgroundColor: Colors.deepOrange,
-          icon: const Icon(Icons.person_add),
-          label: const Text('Add Labour'),
-        ),
+        body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatusCard(
+                            'Active Orders',
+                            Icons.assignment_ind,
+                            _viewModel.activeOrders.length.toString(),
+                            Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildStatusCard(
+                            'Pending Orders',
+                            Icons.local_shipping,
+                            _viewModel.pendingOrders.length.toString(),
+                            Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatusCard(
+                            'Completed Orders',
+                            Icons.check_circle,
+                            _viewModel.completedOrders.length.toString(),
+                            Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildStatusCard(
+                            'Rejected Orders',
+                            Icons.cancel,
+                            _viewModel.rejectedOrders.length.toString(),
+                            Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Add New Labour',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.titleTextColor,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Create a new labour profile to manage workforce efficiently',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.subTitleTextColor,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AddLabourScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add),
+                              SizedBox(width: 8),
+                              Text('Add Labour'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddLabourScreen()),
+              );
+            },
+            child: const Icon(Icons.add),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        )
       ),
     );
   }
 
-  Widget _buildOrderList(List<Order> orders, bool showDetails) {
-    if (orders.isEmpty) {
-      return const Center(child: Text('No orders found'));
-    }
-
-    return ListView.builder(
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return OrderCard(
-          order: order,
-          showDetails: showDetails,
-          onLocationTap: () {
-            // TODO: Open map with location pin
-          },
-          onStatusUpdate: () async {
-            if (order.status != OrderStatus.completed) {
-              final viewModel = context.read<DashboardViewModel>();
-
-              // Show OTP dialog for status changes
-              final otp = await _showOtpDialog();
-              if (otp != null) {
-                final verified = await viewModel.verifyOtp(order.id, otp);
-                if (verified) {
-                  final newStatus = order.status == OrderStatus.arrived
-                      ? OrderStatus.inProgress
-                      : OrderStatus.completed;
-                  await viewModel.updateOrderStatus(order.id, newStatus);
-                }
-              }
-            }
-          },
-        );
-      },
-    );
-  }
-
-  Future<String?> _showOtpDialog() async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Enter OTP'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(hintText: 'Enter the OTP'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+  Widget _buildStatusCard(
+    String title,
+    IconData icon,
+    String count,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Verify'),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.titleTextColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 14, color: AppColors.subTitleTextColor),
           ),
         ],
       ),
     );
-    controller.dispose();
-    return result;
   }
+
+
+
+
 }

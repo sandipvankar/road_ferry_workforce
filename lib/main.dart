@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'views/auth/login_screen.dart';
+import 'package:road_ferry_labour/core/app_colors.dart';
+import 'package:road_ferry_labour/views/auth/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,23 +15,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Road Ferry Labour',
       theme: ThemeData(
-        primaryColor: Colors.deepOrange,
+        primaryColor: AppColors.deepOrange,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepOrange,
-          primary: Colors.deepOrange,
+          seedColor: AppColors.deepOrange,
+          primary: AppColors.deepOrange,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.deepOrange,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.deepOrange,
+          foregroundColor: AppColors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepOrange,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.deepOrange,
+            foregroundColor: AppColors.white,
           ),
         ),
       ),
-      home: const LoginScreen(),
+      home: SplashScreen(),
     );
   }
 }

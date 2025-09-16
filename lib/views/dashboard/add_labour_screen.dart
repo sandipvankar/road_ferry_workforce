@@ -9,7 +9,7 @@ class AddLabourScreen extends StatefulWidget {
 }
 
 class _AddLabourScreenState extends State<AddLabourScreen> {
-  int _availableLabourers = 10; // TODO: Get from API
+  final int _availableLabourers = 10; // TODO: Get from API
   List<Order> _pendingOrders = []; // TODO: Get from API
   bool _isLoading = false;
 
